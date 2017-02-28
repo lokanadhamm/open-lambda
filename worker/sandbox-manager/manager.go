@@ -24,5 +24,5 @@ type SandboxManager interface {
 type DockerSandboxManager interface {
 	Create(name string, sandbox_dir string) (sb.Sandbox, error)
 	Pull(name string) error
-	client() *docker.Client
+	Client() *docker.Client
 }

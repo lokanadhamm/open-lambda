@@ -2,7 +2,6 @@ package server
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -44,16 +43,7 @@ func initPManager(config *config.Config) (pm pmanager.PoolManager, err error) {
 }
 
 func initSBManager(config *config.Config) (sm sbmanager.SandboxManager, err error) {
-	if config.Registry == "docker" {
-		sm, err = sbmanager.NewDockerManager(config)
-	} else if config.Registry == "olregistry" {
-		sm, err = sbmanager.NewRegistryManager(config)
-	} else if config.Registry == "local" {
-		sm, err = sbmanager.NewLocalManager(config)
-	} else {
-		return nil, errors.New("invalid 'registry' field in config")
-	}
-
+	sm = sbmanager.NewDockerManager(config)
 	return sm, nil
 }
 

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/open-lambda/open-lambda/worker/config"
+	"github.com/open-lambda/open-lambda/worker/dockerutil"
 	"github.com/open-lambda/open-lambda/worker/handler/state"
 	sbmanager "github.com/open-lambda/open-lambda/worker/sandbox-manager"
 )
@@ -19,16 +20,13 @@ func getConf() *config.Config {
 	return conf
 }
 
-func NewManager() *sbmanager.LocalManager {
+func NewManager() *sbmanager.DockerManager {
 	conf := getConf()
 
 	log.Printf("Set skip_pull_existing = true\n")
 	conf.Skip_pull_existing = true
 
-	m, err := sbmanager.NewLocalManager(conf)
-	if err != nil {
-		log.Fatal(err)
-	}
+	m := sbmanager.NewDockerManager(conf)
 
 	return m
 }
@@ -60,7 +58,7 @@ func TestHandlerHandlerPull(t *testing.T) {
 	handlers := NewHandlerSet(HandlerSetOpts{Sm: sm, Config: getConf()})
 	name := "nonlocal"
 
-	exists, err := sm.DockerImageExists(name)
+	exists, err := dockerutil.ImageExists(sm.Client(), name)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -71,7 +69,7 @@ func TestHandlerHandlerPull(t *testing.T) {
 	h := handlers.Get(name)
 
 	// Get SHOULD NOT trigger pull
-	exists, err = sm.DockerImageExists(name)
+	exists, err = dockerutil.ImageExists(sm.Client(), name)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -85,7 +83,7 @@ func TestHandlerHandlerPull(t *testing.T) {
 	}
 
 	// Run SHOULD trigger pull
-	exists, err = sm.DockerImageExists(name)
+	exists, err = dockerutil.ImageExists(sm.Client(), name)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
