@@ -1,3 +1,4 @@
+// package includes utility functions not provided by go-dockerclient
 package dockerutil
 
 import (
@@ -6,6 +7,7 @@ import (
 	docker "github.com/fsouza/go-dockerclient"
 )
 
+// ImageExists checks if an image of name exists.
 func ImageExists(client *docker.Client, name string) (bool, error) {
 	_, err := client.InspectImage(name)
 	if err == docker.ErrNoSuchImage {
@@ -16,6 +18,7 @@ func ImageExists(client *docker.Client, name string) (bool, error) {
 	return true, nil
 }
 
+// AssertImageExists returns an error if an image does not exists.
 func AssertImageExists(client *docker.Client, name string) error {
 	if exists, err := ImageExists(client, name); err != nil {
 		return err
@@ -25,6 +28,7 @@ func AssertImageExists(client *docker.Client, name string) error {
 	return nil
 }
 
+// PullAndTag pulls an image from registry and remove its tag.
 func PullAndTag(client *docker.Client, registry string, img string) error {
 	err := client.PullImage(
 		docker.PullImageOptions{

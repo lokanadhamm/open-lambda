@@ -1,12 +1,5 @@
 package sbmanager
 
-/*
-
-Defines common variables and functions to be shared
-by managers which managing Docker containers.
-
-*/
-
 import (
 	"fmt"
 	"log"
@@ -17,18 +10,21 @@ import (
 )
 
 const (
-	DOCKER_LABEL_CLUSTER = "ol.cluster"
-	DOCKER_LABEL_TYPE    = "ol.type"
+	DOCKER_LABEL_CLUSTER = "ol.cluster" // cluster name
+	DOCKER_LABEL_TYPE    = "ol.type"    // container type (sb, olstore, rethinkdb, etc)
 	SANDBOX              = "sandbox"
 	BASE_IMAGE           = "lambda"
 )
 
+// Implementation of DockerSandboxManager interface.
 type DockerManager struct {
+	// TODO: do we still needs a reference to client?
 	client  *docker.Client
 	codeMgr codeManager
 	creator sandboxCreator
 }
 
+// NewDockerManager creates a DockerManager with behaviors specified in opts.
 func NewDockerManager(opts *config.Config) *DockerManager {
 	dm := &DockerManager{}
 
@@ -70,10 +66,13 @@ func (dm *DockerManager) Pull(name string) error {
 	return dm.codeMgr.Pull(name)
 }
 
+// Client returns the Docker client of this DockerManager.
+// TODO: right now only necessary for handler_test.go. Might consider removal.
 func (dm *DockerManager) Client() *docker.Client {
 	return dm.client
 }
 
+// Prints the ID and state of all containers. Only for debugging.
 func (dm *DockerManager) Dump() {
 	opts := docker.ListContainersOptions{All: true}
 	containers, err := dm.client.ListContainers(opts)
