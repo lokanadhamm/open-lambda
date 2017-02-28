@@ -2,6 +2,7 @@ package sbmanager
 
 import (
 	"fmt"
+	"log"
 	"path/filepath"
 
 	docker "github.com/fsouza/go-dockerclient"
@@ -52,6 +53,9 @@ func (nc *namedImgSbCreator) Create(name string, sandbox_dir string) (sb.Sandbox
 }
 
 func newBaseImgSbCreator(client *docker.Client, labels map[string]string, env []string, handler_dir string) *baseImgSbCreator {
+	if err := dockerutil.AssertImageExists(client, BASE_IMAGE); err != nil {
+		log.Fatalf("Docker image %s does not exist", BASE_IMAGE)
+	}
 	bc := new(baseImgSbCreator)
 	bc.init(client, labels, env)
 	bc.handler_dir = handler_dir
